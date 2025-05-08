@@ -3,52 +3,35 @@ import requests
 import time
 from dotenv import load_dotenv
 from authentication import autenticar_tmdb  
-
+from extract import discover_movies
 # Carrega variáveis de ambiente do arquivo .env
 load_dotenv()
 
 # Realiza autenticação
 autenticar_tmdb()
 
-BASE_URL = "https://api.themoviedb.org/3"
-TMDB_API_KEY = os.getenv("TMDB_API_KEY")
 
+def test_discover_movies_basic():
+    filmes = discover_movies(
+        year=2020,
+        sort_by="popularity.desc",
+        vote_count_gte=100,
+        max_pages=1  # Teste leve
+    )
 
-def discover_movies(year, sort_by, vote_count_min=50, lang_filter=None, max_filmes=500):
-    films = []
-    page = 1
-    while len(films) < max_filmes:
-        params = {
-            "api_key": TMDB_API_KEY,
-            "primary_release_year": year,
-            "sort_by": sort_by,
-            "vote_count.gte": vote_count_min,
-            "language": "pt-BR",
-            "page": page
-        }
-        if lang_filter:
-            params["with_original_language"] = lang_filter
+    # 1. Deve retornar uma lista
+    assert isinstance(filmes, list), "A função deve retornar uma lista."
 
-        resp = requests.get(f"{BASE_URL}/discover/movie", params=params)
-        if resp.status_code != 200:
-            break
+    # 2. Lista não deve estar vazia
+    assert len(filmes) > 0, "A lista de filmes não pode estar vazia."
 
-        data = resp.json()
-        results = data.get("results", [])
-        if not results:
-            break
+    # 3. Cada item deve ser um dicionário com chaves esperadas
+    required_keys = {"id", "title", "vote_average", "release_date"}
+    for filme in filmes:
+        assert isinstance(filme, dict), "Cada item deve ser um dicionário."
+        assert required_keys.issubset(filme.keys()), f"Faltam chaves esperadas: {required_keys - filme.keys()}"
 
-        films.extend(results)
-        if page >= data.get("total_pages", 1):
-            break
-        page += 1
-        time.sleep(0.25)
+    print("✅ Teste passou com sucesso!")
 
-    return films[:max_filmes]  # <-- fora do while
-
-    
-
-# Busca filmes populares de 2023 em português
-filmes = discover_movies(year=2023, sort_by="popularity.desc")
-print(f"Total de filmes: {len(filmes)}")
-print(f"Exemplo: {filmes[0]['title']} (Nota: {filmes[0]['vote_average']})")
+if __name__ == "__main__":
+    test_discover_movies_basic()

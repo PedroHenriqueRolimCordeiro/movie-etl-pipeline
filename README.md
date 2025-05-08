@@ -11,14 +11,7 @@ Este projeto é um pipeline de ETL (Extract, Transform, Load) que coleta dados d
 ## Tecnologias Utilizadas
 
 - Python
-- Pandas
+- Polars
 - Requests
-- SQL (MySQL ou PostgreSQL, dependendo da escolha)
+- SQL (MySQL)
 - Git/GitHub
-
-## Como Rodar o Projeto
-
-1. Clone este repositório:
-
-   ```bash
-   git clone https://github.com/PedroHenriqueRolimCordeiro/movie-etl-pipeline.git
